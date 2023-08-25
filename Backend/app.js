@@ -10,6 +10,6 @@ const app = express()
 app.use(cors());
 const port = 3000
 app.use(bodyParser.json());
-sequelize.sync({force : false});
+sequelize.sync({force : true});
 app.use(loginRoutes);
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
