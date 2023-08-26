@@ -7,7 +7,7 @@ form.addEventListener('submit' , addData)
 
 async function addData (e){
 
-
+e.preventDefault();
   const obj = {
     name : username.value,
     email : email.value,
@@ -16,6 +16,8 @@ async function addData (e){
   try
   {
     let user = await axios.post(`http://localhost:3000/user/signup` , obj)
+    let token = user.data;
+    localStorage.setItem('token' , token)
       username.value  = "",
      email.value = "",
      password.value = "" 

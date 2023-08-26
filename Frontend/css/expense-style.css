@@ -2,7 +2,7 @@
 body {
   background: linear-gradient(135deg,#103783, #9bafd9) !important; 
   /* color: #ffffff; */
- height: 100vh;
+ min-height: 100vh;
 }
 
 .container {
