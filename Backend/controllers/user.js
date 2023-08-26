@@ -1,16 +1,16 @@
 const passport = require("passport");
-const  initialzePassport=require('../passport-config')
+const initialzePassport = require("../passport-config");
 const User = require("../models/user");
-const bcrypt = require('bcrypt')
+const bcrypt = require("bcrypt");
 exports.signup = async (req, res, next) => {
   const { name, email, password } = req.body;
-//  console.log(req.body)
+  //  console.log(req.body)
   try {
-    // const Password = await bcrypt.hash(password,10); 
+    const Password = await bcrypt.hash(password, 10);
     let user = await User.create({
       name: name,
       email: email,
-      password: password,
+      password: Password,
     });
 
     res.status(200).json(user);
@@ -25,32 +25,19 @@ exports.signup = async (req, res, next) => {
     }
   }
 };
-
-
-// exports.logincheck =async (req,res)=>{
-//   const user = await  User.findOne({where : {email : req.body.email}})
-//   console.log(user)
-//   initialzePassport(passport ,user);
-//   passport.authenticate('local' , {
-//     successRedirect : '/' , 
-//     failureRedirect : "/user/login",
-//     failureFlash : true ,
-//   })
-//   res.status(200).json(user)
-// }
-exports.logincheck =async (req,res)=>{
- let email1 = req.body.email
- let password1 = req.body.password
-//  console.log(email1 , password1)
- let emailfind =  await User.findOne( {where :{email : email1}})
- if(emailfind){
-   let passmathch = await User.findOne({where : {password : password1}})
-   if(passmathch){
-    res.status(200).json({message : "user loging successfully"})
-   }else{
-    res.status(404).json({message : "You entered Wrong Passwprd"})
-   }
- }else{
-  res.status(404).json({message : "user is not found"})
- }
-}
+exports.logincheck = async (req, res) => {
+  let email1 = req.body.email;
+  let password1 = req.body.password;
+  //  console.log(email1 , password1)
+  let user = await User.findOne({ where: { email: email1 } });
+  if (user) {
+    const passwordMatch = await bcrypt.compare(password1, user.password);
+    if (passwordMatch) {
+      res.status(200).json({ message: "user loging successfully" });
+    } else {
+      res.status(401).json({ message: "You entered Wrong Passwprd" });
+    }
+  } else {
+    res.status(404).json({ message: "user is not found" });
+  }
+};

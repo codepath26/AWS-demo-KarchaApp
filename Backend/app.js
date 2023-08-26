@@ -25,7 +25,6 @@ app.use(passport.initialize());
 app.use(passport.session())
 
 app.use(cors());
-// app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
 sequelize.sync({force :false});
 app.use(loginRoutes);
