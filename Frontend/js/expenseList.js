@@ -11,9 +11,13 @@ items.addEventListener("click", modified);
 window.addEventListener("DOMContentLoaded", getdataFromLocalStorage);
 async function getdataFromLocalStorage() {
   try{
-   
-    
-    let response = await axios.get("http://localhost:3000/expenseDetails")
+   let token = localStorage.getItem('token')
+  //  console.log(token);
+    let response = await axios.get("http://localhost:3000/expenseDetails" , {
+      headers :{
+        'Authorization': token ,
+      }
+    })
     // console.log(response);
       response.data.forEach((obj) => {
         ids.push(obj.id)
@@ -41,7 +45,7 @@ async function addData(e) {
   try{
 
    let response = await axios.post("http://localhost:3000/expenseDetails",obj)
-   console.log(response.data)
+   console.log(response)
       DisplayData(obj)
       ids.push(response.data.id)
       amount.value = "";

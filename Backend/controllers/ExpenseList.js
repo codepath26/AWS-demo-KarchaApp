@@ -1,15 +1,23 @@
+const { where } = require("sequelize");
 const User = require("../models/appo-Details");
+const jwt = require('jsonwebtoken');
 
 exports.getDetails = async (req, res, next) => {
   try {
-    let data = await User.findAll();
+    const token = req.header('Authorization')
+    const user = jwt.verify(token , 'sdfssdf594846');
+    console.log(user.userId);
+    const getuser =  await User.findByPk(user.userId)
+    req.user = getuser ; 
+    let data = await User.findAll({where : {userId : req.user.userId}});
+    // console.log(data)
     res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ message: "user not able to create" });
   }
 };
 exports.postDetail = async (req, res, next) => {
- console.log(req.body)
+//  console.log(req.body)
  const { amount,description , category} = req.body;
   try {
     const newUser = await User.create({

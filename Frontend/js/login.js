@@ -12,15 +12,19 @@ let obj = {
   password : password.value
 }
 try{
+  console.log(obj)
   let data = await axios.post('http://localhost:3000/user/login' , obj);
   console.log(data.data)
   email.value = "",
   password.value = "" 
+  window.location.href = '../html/expenseList.html';
  
 }catch(err){
   console.log(err.response.data.message);
   email.value = "",
   password.value = "" 
+  // Redirect to a new page
+
 }
    
  } 
