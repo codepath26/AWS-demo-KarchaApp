@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 const initialzePassport = require("../passport-config");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
-const generateAccessToken =(id) =>{
+const generateAccessToken =(id , email) =>{
   const secretKey = 'sdfssdf594846';
-const payload = { userId: id, username: 'john_doe' };
+const payload = { userId: id, email};
    return jwt.sign(payload, secretKey, { expiresIn: '1h' });
  
 }
@@ -41,9 +41,9 @@ exports.logincheck = async (req, res) => {
   if (user) {
     const passwordMatch = await bcrypt.compare(password1, user.password);
     if (passwordMatch) {
-      const token = generateAccessToken(user.id)
+      const token = generateAccessToken(user.id , user.email);
       // console.log(token)
-      res.status(200).json({ message: "user loging successfully" , token : token });
+      res.status(200).json({ message: "user loging successfully" , token : token , user  : user });
     } else {
       res.status(401).json({ message: "You entered Wrong Passwprd" });
     }

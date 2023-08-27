@@ -4,6 +4,7 @@ const router = express.Router();
 
 
 router.get('/expenseDetails',useController.getDetails)
+router.get('/getPremiumMemberShip',useController.getPremium)
 router.get('/expenseDetails/:id',useController.getDetailsbyId)
 router.post('/expenseDetails' , useController.postDetail)
 router.delete('/expenseDetails/:id' , useController.deletDetail)

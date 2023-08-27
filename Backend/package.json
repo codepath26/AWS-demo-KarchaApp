@@ -25,6 +25,7 @@
     "mysql2": "^3.6.0",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
+    "razorpay": "^2.9.2",
     "sequelize": "^6.32.1"
   }
 }
