@@ -14,7 +14,7 @@ paybutton.addEventListener('click' , payment);
 addExpense.addEventListener("submit", addData);
  showLeaderBoard.addEventListener('click' , leaderBoard)
 items.addEventListener("click", modified);
-console.log(feature1);
+
 window.addEventListener("DOMContentLoaded", fetchData);
 async function fetchData() {
   try{
@@ -44,8 +44,8 @@ async function fetchData() {
 
 async function addData(e) {
   e.preventDefault();
-  feature1.removeChild();
   let item = document.createElement("li");
+  console.log(typeof(amount.value))
   item.classList.add("list-group-item");
   let obj = {
     amount: amount.value,
@@ -176,7 +176,7 @@ async function modified(e)
     console.log(response)
     feature1.style.display= "block"
    response.data.forEach(obj=>{
-    feature1.innerHTML +=`<li class='list-group-item'>${obj.name} have TotalCost ${obj.total_cost ? obj.total_cost:0  } </li>` 
+    feature1.innerHTML +=`<li class='list-group-item'>${obj.name} have TotalCost ${obj.totalExpenses ? obj.totalExpenses:0  } </li>` 
    })
    
   }

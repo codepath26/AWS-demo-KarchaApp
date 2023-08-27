@@ -11,11 +11,11 @@ const flash = require('express-flash');
 const app = express()
 app.use(bodyParser.json());   
 const port = 9000 
+app.use(cors());
 User.hasMany(Expense)
 Expense.belongsTo(User , { onDelete: 'CASCADE'})
 User.hasMany(Order)
-Order.belongsTo(User);
-app.use(cors());
+Order.belongsTo(User , { onDelete: 'CASCADE'});
 app.use(userRoutes);
 app.use(loginRoutes);
 sequelize.sync({force :false});
