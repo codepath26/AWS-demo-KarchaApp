@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const user1 = require("../models/user");
 const Order = require("../models/order");
 const sequelize = require('../utils/database');
+const User = require('../models/user');
 exports.getDetails = async (req, res, next) => {
   try {
     const token = req.header("Authorization");
@@ -20,8 +21,14 @@ exports.getDetails = async (req, res, next) => {
 exports.postDetail = async (req, res, next) => {
   const token = req.header("Authorization");
   const user = jwt.verify(token, "sdfssdf594846");
+   const user2 = await user1.findByPk(user.userId);
   const { amount, description, category } = req.body;
   try {
+
+     let total = user2.totalExpenses + parseInt(amount);
+     console.log(total)
+      user2.update({totalExpenses : total });
+
     const newUser = await Expenses.create({
       amount: amount,
       description: description,
@@ -123,7 +130,7 @@ exports.getfeature =async(req,res)=>{
 try{
    console.log('this')
   const leaderBoardd = await user1.findAll({
-    attributes : ['id' , 'name' ,[sequelize.fn('sum' ,sequelize.col('expenses.amount')) ,'total_cost']],
+    attributes : ['id' , 'name' ,'totalExpenses'],
     include : [
       {
         model : Expenses,
@@ -131,7 +138,7 @@ try{
       }
     ],
     group : ['id'],
-    order :[['total_cost' , "DESC"]]
+    order :[['totalExpenses' , "DESC"]]
   });
   
   res.status(200).json(leaderBoardd)
