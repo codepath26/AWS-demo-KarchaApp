@@ -1,16 +1,17 @@
 require('dotenv').config(); 
 const { where } = require("sequelize");
-const User = require("../models/appo-Details");
+const Expenses = require("../models/appo-Details");
 const  Razorpay  = require('razorpay');
 const jwt = require("jsonwebtoken");
 const user1 = require("../models/user");
 const Order = require("../models/order");
+const sequelize = require('../utils/database');
 exports.getDetails = async (req, res, next) => {
   try {
     const token = req.header("Authorization");
     const user = jwt.verify(token, "sdfssdf594846");
     const getuser = await user1.findByPk(user.userId);
-    let data = await User.findAll({ where: { userId: user.userId } });
+    let data = await Expenses .findAll({ where: { userId: user.userId } });
     res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ message: "user not able to create" });
@@ -21,7 +22,7 @@ exports.postDetail = async (req, res, next) => {
   const user = jwt.verify(token, "sdfssdf594846");
   const { amount, description, category } = req.body;
   try {
-    const newUser = await User.create({
+    const newUser = await Expenses.create({
       amount: amount,
       description: description,
       category: category,
@@ -34,9 +35,8 @@ exports.postDetail = async (req, res, next) => {
 };
 exports.deletDetail = async (req, res, next) => {
   const listId = req.params.id;
-
   try {
-    const user1 = await User.findOne({ where: { id: listId } });
+    const user1 = await Expenses.findOne({ where: { id: listId } });
     user1.destroy();
     return res.status(200).json({ message: "data deleted successfully" });
   } catch (error) {
@@ -47,7 +47,7 @@ exports.updateDetail = async (req, res, next) => {
   const listtId = req.params.id;
   const updatedData = req.body;
   try {
-    let updated = await User.updateByPk(listtId);
+    let updated = await Expenses.updateByPk(listtId);
     res.status(200).json(updated);
   } catch (err) {
     res.status(500).json({ err: "Error Updating data" });
@@ -57,7 +57,7 @@ exports.updateDetail = async (req, res, next) => {
 exports.getDetailsbyId = async (req, res) => {
   let getId = req.params.id;
   try {
-    let getresult = await User.findOne({ where: { id: getId } });
+    let getresult = await Expenses.findOne({ where: { id: getId } });
     res.status(200).json(getresult);
   } catch (err) {
     res.status(500).json({ err: "Error getting data" });
@@ -108,7 +108,7 @@ exports.updateTransactionStatus =async (req ,res)=>{
     const payuser = await user1.findByPk(id);
     const {order_id ,payment_id} = req.body;
    let order = await Order.findOne({where:{orderId : order_id}})
-   console.log(order)
+  //  console.log(order)
    await order.update({pamentId: payment_id ,status : "SUCCESSFUL"})
    await payuser.update({ispremiumuser : true})
    return res.status(202).json({success : true ,message : "Transection Successful" })
@@ -116,4 +116,26 @@ exports.updateTransactionStatus =async (req ,res)=>{
   }catch(err){
     return res.status(500).json({message : "internal server error"})
   }
+}
+
+exports.getfeature =async(req,res)=>{
+
+try{
+   console.log('this')
+  const leaderBoardd = await user1.findAll({
+    attributes : ['id' , 'name' ,[sequelize.fn('sum' ,sequelize.col('expenses.amount')) ,'total_cost']],
+    include : [
+      {
+        model : Expenses,
+        attributes : []
+      }
+    ],
+    group : ['id'],
+    order :[['total_cost' , "DESC"]]
+  });
+  
+  res.status(200).json(leaderBoardd)
+}catch(err){
+  res.status(500).json(err)
+}
 }
