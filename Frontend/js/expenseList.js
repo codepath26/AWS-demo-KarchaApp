@@ -3,15 +3,18 @@
 let ids = [];
 let amount = document.getElementById("ExpenseAmount");
 let description = document.getElementById("Description");
+let showLeaderBoard = document.getElementById("leaderBoard");
 let paybutton = document.getElementById("getpremium");
 let category = document.getElementById("Category");
 let addExpense = document.getElementById("add-items");
+let feature1 = document.getElementById("leaderborditem");
 const isPremiumuser = document.getElementById('premiumUser');
 let items = document.getElementById("items");
 paybutton.addEventListener('click' , payment);
 addExpense.addEventListener("submit", addData);
- console.log( isPremiumuser)
+ showLeaderBoard.addEventListener('click' , leaderBoard)
 items.addEventListener("click", modified);
+console.log(feature1);
 window.addEventListener("DOMContentLoaded", fetchData);
 async function fetchData() {
   try{
@@ -20,12 +23,15 @@ async function fetchData() {
    if(ispremium){
     isPremiumuser.style.display = "block" ;
     paybutton.style.display = "none";
+   }else{
+     showLeaderBoard.style.display = "none"
    }
     let response = await axios.get("http://localhost:9000/expenseDetails",{
       headers :
       { 'Authorization': token
     }})
       response.data.forEach((obj) => {
+        console.log(obj.isPremiumuser)
         DisplayData(obj);
       });
   }
@@ -38,6 +44,7 @@ async function fetchData() {
 
 async function addData(e) {
   e.preventDefault();
+  feature1.removeChild();
   let item = document.createElement("li");
   item.classList.add("list-group-item");
   let obj = {
@@ -160,7 +167,19 @@ async function modified(e)
 
 
 
-  
+  // show the leader board
+
+  async function leaderBoard(){
+
+    let response = await axios.get('http://localhost:9000/premiumUser/leaderBoard')
+
+    console.log(response)
+    feature1.style.display= "block"
+   response.data.forEach(obj=>{
+    feature1.innerHTML +=`<li class='list-group-item'>${obj.name} have TotalCost ${obj.total_cost ? obj.total_cost:0  } </li>` 
+   })
+   
+  }
 
 
 
