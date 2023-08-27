@@ -1,61 +1,89 @@
 require('dotenv').config(); 
-const { where } = require("sequelize");
 const Expenses = require("../models/appo-Details");
-const  Razorpay  = require('razorpay');
-const jwt = require("jsonwebtoken");
-const user1 = require("../models/user");
-const Order = require("../models/order");
+const User = require("../models/user");
 const sequelize = require('../utils/database');
-const User = require('../models/user');
+
+
+
+
+
 exports.getDetails = async (req, res, next) => {
   try {
-    const token = req.header("Authorization");
-    const user = jwt.verify(token, "sdfssdf594846");
-    const getuser = await user1.findByPk(user.userId);
-    let data = await Expenses .findAll({ where: { userId: user.userId } });
+    // console.log(req.user.userId , "this");
+    let data = await Expenses.findAll({ where: { userId: req.user.userId } });
+   
     res.status(200).json(data);
   } catch (err) {
     return res.status(500).json({ message: "user not able to create" });
   }
 };
+
+
+
 exports.postDetail = async (req, res, next) => {
-  const token = req.header("Authorization");
-  const user = jwt.verify(token, "sdfssdf594846");
-   const user2 = await user1.findByPk(user.userId);
-  const { amount, description, category } = req.body;
+  const t = await sequelize.transaction();
   try {
+  
 
-     let total = user2.totalExpenses + parseInt(amount);
-     console.log(total)
-      user2.update({totalExpenses : total });
 
+    const id = req.user.userId
+    const user = await User.findByPk(id);
+    const { amount, description, category } = req.body;
+  
+     let total = user.totalExpenses + parseInt(amount);
+     console.log(total);
+     await  user.update({totalExpenses : total },{
+        transaction : t
+      });
+ 
     const newUser = await Expenses.create({
       amount: amount,
       description: description,
       category: category,
-      userId: user.userId,
-    });
+      userId: useer.id,
+    },{ transaction: t });
+    await t.commit();
     res.status(201).json(newUser); // Assuming you want to send the created user back
   } catch (err) {
+    await t.rollback();
     res.status(500).json({ message: "internal server error" });
   }
 };
+
+
+
+
 exports.deletDetail = async (req, res, next) => {
+
   const listId = req.params.id;
+ 
   try {
-    const user1 = await Expenses.findOne({ where: { id: listId } });
-    user1.destroy();
+    const expense = await Expenses.findOne({ where: { id: listId } });
+     const id = expense.userId;
+    const user =  await User.findByPk(id);
+    // console.log(user.totalExpenses)
+    // console.log(parseInt(expense.amount))
+    const expenseAmount = parseInt(expense.amount)
+    let total = user.totalExpenses - expenseAmount ;
+    // console.log(total)
+    // console.log(typeof(total))
+    user.update({totalExpenses : total})
+    expense.destroy();
     return res.status(200).json({ message: "data deleted successfully" });
   } catch (error) {
     return res.status(500).json({ error: "Error Deleting data" });
-  }
+   }
 };
 exports.updateDetail = async (req, res, next) => {
-  const listtId = req.params.id;
-  const updatedData = req.body;
   try {
-    let updated = await Expenses.updateByPk(listtId);
-    res.status(200).json(updated);
+  const listtId = req.params.id;
+  let expense = await Expenses.updateByPk(listtId);
+  const id = expense.userId;
+  const user = User.findByPk(id);
+  const expenseAmount = parseInt(expense.amount)
+  let total = user.totalExpenses - expenseAmount ;
+  user.update({totalExpenses : total})
+    res.status(200).json(expense);
   } catch (err) {
     res.status(500).json({ err: "Error Updating data" });
   }
@@ -64,85 +92,14 @@ exports.updateDetail = async (req, res, next) => {
 exports.getDetailsbyId = async (req, res) => {
   let getId = req.params.id;
   try {
-    let getresult = await Expenses.findOne({ where: { id: getId } });
-    res.status(200).json(getresult);
+    let expense = await Expenses.findOne({ where: { id: getId } });
+    const id = expense.userId;
+  const user = User.findByPk(id);
+  const expenseAmount = parseInt(expense.amount)
+  let total = user.totalExpenses - expenseAmount ;
+  user.update({totalExpenses : total})
+    res.status(200).json(expense);
   } catch (err) {
     res.status(500).json({ err: "Error getting data" });
   }
 };
-
-exports.getPremium = async (req, res)=>{
-  try{
-    const token = req.header("Authorization");
-    const user = jwt.verify(token, "sdfssdf594846");
-    let id = user.userId;
-    const payuser = await user1.findByPk(id);
-    const rzp = new Razorpay({
-      key_id : process.env.RAZORPAY_KEY_ID,
-      key_secret :  process.env.RAZORPAY_KEY_SECRET,
-    })
-    
-    const  amount = 250;
-    
- try{
-   const order =   await  rzp.orders.create({amount , currency : "INR"})
-  //  console.log(order)
-   const newOreder =  await Order.create({
-       orderId: order.id,
-        status: 'PANDING',
-        userId: payuser.id, 
-   });
-  //  console.log(newOreder)
-
-   return res.status(201).json({ order:  newOreder, key_id: rzp.key_id });
-  }catch(err){
-    console.log('Razorepay API error' , err);
-    return res.status(500).json({ message: "Error creating order" });;
-  }
-}
-  catch(err){
-    console.error("Internal server error:", err);
-    res.status(500).json({ message: 'internal in Razorpay Api call' });
-  }
-};
-
-
-exports.updateTransactionStatus =async (req ,res)=>{
-  try{
-    const token = req.header("Authorization");
-    const user = jwt.verify(token, "sdfssdf594846");
-    let id = user.userId;
-    const payuser = await user1.findByPk(id);
-    const {order_id ,payment_id} = req.body;
-   let order = await Order.findOne({where:{orderId : order_id}})
-  //  console.log(order)
-   await order.update({pamentId: payment_id ,status : "SUCCESSFUL"})
-   await payuser.update({ispremiumuser : true})
-   return res.status(202).json({success : true ,message : "Transection Successful" })
-
-  }catch(err){
-    return res.status(500).json({message : "internal server error"})
-  }
-}
-
-exports.getfeature =async(req,res)=>{
-
-try{
-   console.log('this')
-  const leaderBoardd = await user1.findAll({
-    attributes : ['id' , 'name' ,'totalExpenses'],
-    include : [
-      {
-        model : Expenses,
-        attributes : []
-      }
-    ],
-    group : ['id'],
-    order :[['totalExpenses' , "DESC"]]
-  });
-  
-  res.status(200).json(leaderBoardd)
-}catch(err){
-  res.status(500).json(err)
-}
-}
