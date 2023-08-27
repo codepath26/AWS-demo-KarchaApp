@@ -68,29 +68,52 @@ exports.getPremium = async (req, res)=>{
   try{
     const token = req.header("Authorization");
     const user = jwt.verify(token, "sdfssdf594846");
-    const user1 = await User.findByPk(user.userId);
+    let id = user.userId;
+    const payuser = await user1.findByPk(id);
     const rzp = new Razorpay({
       key_id : process.env.RAZORPAY_KEY_ID,
       key_secret :  process.env.RAZORPAY_KEY_SECRET,
     })
-    const  amount = 25000;
-    console.log('this')
-    rzp.orders.create({amount , currency : "INR"} , (err,order)=>{
-      if(err){
-        console.log('Razorpay API error' ,err);
-        return res.status(500).json({ message: "Error creating order" });
-      }try{
+    
+    const  amount = 250;
+    
+ try{
+   const order =   await  rzp.orders.create({amount , currency : "INR"})
+  //  console.log(order)
+   const newOreder =  await Order.create({
+       orderId: order.id,
+        status: 'PANDING',
+        userId: payuser.id, 
+   });
+  //  console.log(newOreder)
 
-        user1.createOrder({orderid : order.id ,status : 'PANDING'})
-        return res.status(201).json({order , key_id: rzp.key_id})
-        }catch(err){
-         console.error("User order creation error : " , err )
-          return res.status(500).json({ message: "Error creating user order" });
-        }
-    });
+   return res.status(201).json({ order:  newOreder, key_id: rzp.key_id });
   }catch(err){
-     console.error("Internal server error:", err);
-    res.status(500).json({message : 'internal in Razorpay Api call'});
+    console.log('Razorepay API error' , err);
+    return res.status(500).json({ message: "Error creating order" });;
   }
+}
+  catch(err){
+    console.error("Internal server error:", err);
+    res.status(500).json({ message: 'internal in Razorpay Api call' });
+  }
+};
 
+
+exports.updateTransactionStatus =async (req ,res)=>{
+  try{
+    const token = req.header("Authorization");
+    const user = jwt.verify(token, "sdfssdf594846");
+    let id = user.userId;
+    const payuser = await user1.findByPk(id);
+    const {order_id ,payment_id} = req.body;
+   let order = await Order.findOne({where:{orderId : order_id}})
+   console.log(order)
+   await order.update({pamentId: payment_id ,status : "SUCCESSFUL"})
+   await payuser.update({ispremiumuser : true})
+   return res.status(202).json({success : true ,message : "Transection Successful" })
+
+  }catch(err){
+    return res.status(500).json({message : "internal server error"})
+  }
 }
