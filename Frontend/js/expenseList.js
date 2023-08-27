@@ -1,186 +1,183 @@
+// geeting the element
+const amount = document.getElementById("ExpenseAmount");
+const description = document.getElementById("Description");
+const showLeaderBoard = document.getElementById("leaderBoard");
+const paybutton = document.getElementById("getpremium");
+const category = document.getElementById("Category");
+const addExpense = document.getElementById("add-items");
+const feature1 = document.getElementById("leaderborditem");
+const isPremiumuser = document.getElementById("premiumUser");
+const items = document.getElementById("items");
 
-
-let ids = [];
-let amount = document.getElementById("ExpenseAmount");
-let description = document.getElementById("Description");
-let showLeaderBoard = document.getElementById("leaderBoard");
-let paybutton = document.getElementById("getpremium");
-let category = document.getElementById("Category");
-let addExpense = document.getElementById("add-items");
-let feature1 = document.getElementById("leaderborditem");
-const isPremiumuser = document.getElementById('premiumUser');
-let items = document.getElementById("items");
-paybutton.addEventListener('click' , payment);
-addExpense.addEventListener("submit", addData);
- showLeaderBoard.addEventListener('click' , leaderBoard)
+// evente Listner
+paybutton.addEventListener("click", payment);
+addExpense.addEventListener("submit", addExpenses);
+showLeaderBoard.addEventListener("click", leaderBoard);
 items.addEventListener("click", modified);
-
 window.addEventListener("DOMContentLoaded", fetchData);
-async function fetchData() {
-  try{
-   let token = localStorage.getItem('token')
-   let ispremium= localStorage.getItem('ispremium')
-   if(ispremium){
-    isPremiumuser.style.display = "block" ;
-    paybutton.style.display = "none";
-   }else{
-     showLeaderBoard.style.display = "none"
-   }
-    let response = await axios.get("http://localhost:9000/expenseDetails",{
-      headers :
-      { 'Authorization': token
-    }})
-      response.data.forEach((obj) => {
-        console.log(obj.isPremiumuser)
-        DisplayData(obj);
-      });
-  }
-  catch( err){
-   console.log(err)
-  }
-   
 
+// DomContent Loaded
+
+async function fetchData() {
+  try {
+    let token = localStorage.getItem("token");
+    let ispremium = localStorage.getItem("ispremium");
+    if (ispremium) {
+      isPremiumuser.style.display = "block";
+      paybutton.style.display = "none";
+    } else {
+      showLeaderBoard.style.display = "none";
+    }
+    let response = await axios.get("http://localhost:9000/expenseDetails", {
+      headers: { Authorization: token },
+    });
+    console.log(response.data)
+    response.data.forEach((obj) => {
+      DisplayData(obj);
+    });
+  } catch (err) {
+    console.log(err);
+  }
 }
 
-async function addData(e) {
-  e.preventDefault();
-  let item = document.createElement("li");
-  console.log(typeof(amount.value))
-  item.classList.add("list-group-item");
-  let obj = {
+
+// adding the Data to DOM and Database
+
+async function addExpenses(e) {
+  e.preventDefault();    // why we use this ?????? behind the sence
+  const obj = {
     amount: amount.value,
     description: description.value,
     category: category.value,
   };
- 
 
-  try{
-    let token = localStorage.getItem('token')
-   let response = await axios.post("http://localhost:9000/expenseDetails",obj,{
-    headers :
-    { 'Authorization': token
-  }})
-   console.log(response)
-      DisplayData(obj)
-      ids.push(response.data.id)
-      amount.value = "";
-      description.value = "";
-      category.value = "Movies";
-  }catch( err){
-    console.log(err)
-   }
-   
+  try {
+    let token = localStorage.getItem("token");
+    let response = await axios.post(
+      "http://localhost:9000/expenseDetails",
+      obj,
+      {
+        headers: {
+
+           Authorization: token,
+
+          },
+      }
+    );
+    DisplayData(response.data);
+    amount.value = "";
+    description.value = "";
+    category.value = "Movies";
   }
-async function modified(e)
- {
+  catch (err) {
+    console.log(err);
+  }
+}
+
+
+// adding the functionality of the edit and delete button 
+
+async function modified(e) {
   e.preventDefault();
-  
+
   if (e.target.classList.contains("delete")) {
     let li = e.target.parentElement;
-     const inp = li.querySelector('#userid')
-     console.log(inp , "this is inpurt")
-    let index = Array.from(li.parentNode.children).indexOf(li);
-   
-    if (index !== -1) {
-       let id = ids[index];
-       console.log(id);
-      try{
-        await axios.delete(`http://localhost:9000/expenseDetails/${id}`)
-        ids.splice(index, 1);
-        items.removeChild(li);
-      }catch(err){console.log(err);}
-   } 
+    const id = li.querySelector("#userid").value;
+    console.log(id);
+    try {
+      await axios.delete(`http://localhost:9000/expenseDetails/${id}`);
+      items.removeChild(li);
+    } catch (err) {
+      console.log(err);
+    }
   }
   if (e.target.classList.contains("edit")) {
     let li = e.target.parentElement;
-    let index = Array.from(li.parentNode.children).indexOf(li)
-    if (index !== -1) {
-      let id = ids[index];
-      try{
-        let response = await axios.get(`http://localhost:9000/expenseDetails/${id}`)
-        console.log(response)
-          amount.value = response.data.amount;
-          description.value = response.data.description;
-          category.value = response.data.category;
-         ids.splice(index, 1);
-         console.log(ids)
-         items.removeChild(li);
-         await axios.delete(`http://localhost:9000/expenseDetails/${id}`)
-      }catch(err){
-        console.log(err);
-      }
+    const id = li.querySelector("#userid").value;
+    try {
+      let response = await axios.get(
+        `http://localhost:9000/expenseDetails/${id}`
+      );
+      amount.value = response.data.amount;
+      description.value = response.data.description;
+      category.value = response.data.category;
+      items.removeChild(li);
+      await axios.delete(`http://localhost:9000/expenseDetails/${id}`);
+    } catch (err) {
+      console.log(err);
     }
-   
   }
 }
 
-    function DisplayData(obj) 
-{ 
 
-  items.innerHTML += `<li class="list-group-item mt-2">Amount :${obj.amount}, Description :${obj.description}, Category : ${obj.category}<button class="btn btn-success btn-sm mx-1 edit float-end">Edit</button><button class="btn btn-danger btn-sm float-end delete mx-1">Delete</button><input type="hidden" name="userid" id="userid" value="${obj.id}"></li>`
+//disolay the getting data to the DOM
+
+
+function DisplayData(obj) {
+
+  items.innerHTML += `<li class="list-group-item mt-2">Amount :${obj.amount}, Description :${obj.description}, Category : ${obj.category}<button class="btn btn-success btn-sm mx-1 edit float-end">Edit</button><button class="btn btn-danger btn-sm float-end delete mx-1">Delete</button><input type="hidden" name="userid" id="userid" value="${obj.id}"></li>`;
 }
 
- async function  payment (e){
-  try{
 
-    let token = localStorage.getItem('token')
-    let response = await axios.get("http://localhost:9000/getPremiumMemberShip",{
-      headers :
-      { 'Authorization': token
-    }})
-    console.log(response.data.order.orderId)
-    let options = {
-      "key" : response.data.key_id ,
-      "order_id" : response.data.order.orderId,
-      "handler" : async function(response){
-        try{
-
-          await axios.post(`http://localhost:9000/updatetransactionstatus`,{
-            order_id : options.order_id,
-            payment_id : response.razorpay_payment_id,
-          },{headers : {'Authorization': token}})
-          alert('you are premium user now')
-          localStorage.setItem('ispremium' , true);
-          isPremiumuser.style.display = "block" ;
-          paybutton.style.display = "none";
+//adding  the Payment gatway razorpay
 
 
-        }catch(err){
-          console.log(err.message , "thisss");
-        }
-
+async function payment(e) {
+  try {
+    let token = localStorage.getItem("token");
+    let response = await axios.get(
+      "http://localhost:9000/premium/getPremiumMemberShip",
+      {
+        headers: { Authorization: token },
       }
-    }
-    const rzp1 =new Razorpay(options);
+    );
+
+    let options = {
+      key: response.data.key_id,
+      order_id: response.data.order.orderId,
+      handler: async function (response) {
+        try {
+          await axios.post(
+            `http://localhost:9000/premium/updatetransactionstatus`,
+            {
+              order_id: options.order_id,
+              payment_id: response.razorpay_payment_id,
+            },
+            { headers: { Authorization: token } }
+          );
+          alert("you are premium user now");
+          localStorage.setItem("ispremium", true);
+          isPremiumuser.style.display = "block";
+          paybutton.style.display = "none";
+          showLeaderBoard.style.display = "none";
+        } catch (err) {
+          console.log(err.message, "thisss");
+        }
+      },
+    };
+    const rzp1 = new Razorpay(options);
     rzp1.open();
     e.preventDefault();
-    rzp1.on('payment.failed' ,function (response){
-      console.log(response)
-      alert('something went wrong')
-    })
-
-  }catch(err){
+    rzp1.on("payment.failed", function (response) {
+      console.log(response);
+      alert("something went wrong");
+    });
+  } catch (err) {
     console.log(err.message);
   }
-  }
+}
 
+// show the leader board
 
+async function leaderBoard() {
+  let response = await axios.get(
+    "http://localhost:9000/premium/leaderBoard"
+  );
 
-
-  // show the leader board
-
-  async function leaderBoard(){
-
-    let response = await axios.get('http://localhost:9000/premiumUser/leaderBoard')
-
-    console.log(response)
-    feature1.style.display= "block"
-   response.data.forEach(obj=>{
-    feature1.innerHTML +=`<li class='list-group-item'>${obj.name} have TotalCost ${obj.totalExpenses ? obj.totalExpenses:0  } </li>` 
-   })
-   
-  }
-
-
-
-
+  console.log(response);
+  feature1.style.display = "block";
+  feature1.innerHTML += `<h2><b>Leader Board<b>`
+  response.data.forEach((obj) => {
+    feature1.innerHTML += `<li class='list-group-item mt-2'> Name :- ${obj.name} and TotalCost:- ${obj.totalExpenses ? obj.totalExpenses : 0} </li>`;
+  });
+}
