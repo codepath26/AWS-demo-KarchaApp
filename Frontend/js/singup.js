@@ -15,7 +15,7 @@ e.preventDefault();
   }
   try
   {
-    let user = await axios.post(`http://localhost:3000/user/signup` , obj)
+    let user = await axios.post(`http://localhost:9000/user/signup` , obj)
     let token = user.data;
     localStorage.setItem('token' , token)
       username.value  = "",

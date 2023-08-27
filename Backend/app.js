@@ -5,16 +5,16 @@ const cors = require('cors')
 const bodyParser = require('body-parser');
 const loginRoutes = require('./routes/login');
 const User = require('./models/user');
+const Order = require('./models/order');
 const Expense = require('./models/appo-Details');
 const flash = require('express-flash');
 const app = express()
-app.use(bodyParser.json());
-const port = 3000 
-// const passport = require('passport');
-// const flash = require('express-flash')
-// const  session = require("express-session")
-User.hasMany(Expense);
-Expense.belongsTo(User);
+app.use(bodyParser.json());   
+const port = 9000 
+User.hasMany(Expense)
+Expense.belongsTo(User , { onDelete: 'CASCADE'})
+User.hasMany(Order)
+Order.belongsTo(User);
 app.use(cors());
 app.use(userRoutes);
 app.use(loginRoutes);

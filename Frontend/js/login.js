@@ -12,12 +12,14 @@ let obj = {
   password : password.value
 }
 try{
-  console.log(obj)
-  let data = await axios.post('http://localhost:3000/user/login' , obj);
-  console.log(data.data)
+
+  let response = await axios.post('http://localhost:9000/user/login' , obj);
+  const token = response.data.token;
+  const user = response.data.user;
   email.value = "",
   password.value = "" 
-  window.location.href = '../html/expenseList.html';
+  localStorage.setItem('token' ,token);
+  window.location.href = '../html/expenseList.html'
  
 }catch(err){
   console.log(err.response.data.message);
