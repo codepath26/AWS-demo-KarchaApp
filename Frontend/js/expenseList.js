@@ -6,22 +6,26 @@ let description = document.getElementById("Description");
 let paybutton = document.getElementById("getpremium");
 let category = document.getElementById("Category");
 let addExpense = document.getElementById("add-items");
+const isPremiumuser = document.getElementById('premiumUser');
 let items = document.getElementById("items");
 paybutton.addEventListener('click' , payment);
 addExpense.addEventListener("submit", addData);
+ console.log( isPremiumuser)
 items.addEventListener("click", modified);
-window.addEventListener("DOMContentLoaded", getdataFromLocalStorage);
-async function getdataFromLocalStorage() {
+window.addEventListener("DOMContentLoaded", fetchData);
+async function fetchData() {
   try{
    let token = localStorage.getItem('token')
-   console.log(token);
+   let ispremium= localStorage.getItem('ispremium')
+   if(ispremium){
+    isPremiumuser.style.display = "block" ;
+    paybutton.style.display = "none";
+   }
     let response = await axios.get("http://localhost:9000/expenseDetails",{
       headers :
       { 'Authorization': token
     }})
-    console.log(response);
       response.data.forEach((obj) => {
-        ids.push(obj.id)
         DisplayData(obj);
       });
   }
@@ -105,7 +109,7 @@ async function modified(e)
 
     function DisplayData(obj) 
 { 
-  console.log(obj.id)
+
   items.innerHTML += `<li class="list-group-item mt-2">Amount :${obj.amount}, Description :${obj.description}, Category : ${obj.category}<button class="btn btn-success btn-sm mx-1 edit float-end">Edit</button><button class="btn btn-danger btn-sm float-end delete mx-1">Delete</button><input type="hidden" name="userid" id="userid" value="${obj.id}"></li>`
 }
 
@@ -117,15 +121,27 @@ async function modified(e)
       headers :
       { 'Authorization': token
     }})
+    console.log(response.data.order.orderId)
     let options = {
       "key" : response.data.key_id ,
-      "order_id" : response.data.order_id,
+      "order_id" : response.data.order.orderId,
       "handler" : async function(response){
-        await axios.post(`http://localhost:9000/ipdatetransactionstatus`,{
-          order_id : option.order_id,
-          payment_id : response.razorpay_payment_id,
-        },{headers : {'Authorization': token}})
-        alert('you are premium user now')
+        try{
+
+          await axios.post(`http://localhost:9000/updatetransactionstatus`,{
+            order_id : options.order_id,
+            payment_id : response.razorpay_payment_id,
+          },{headers : {'Authorization': token}})
+          alert('you are premium user now')
+          localStorage.setItem('ispremium' , true);
+          isPremiumuser.style.display = "block" ;
+          paybutton.style.display = "none";
+
+
+        }catch(err){
+          console.log(err.message , "thisss");
+        }
+
       }
     }
     const rzp1 =new Razorpay(options);
@@ -137,12 +153,13 @@ async function modified(e)
     })
 
   }catch(err){
-    console.log(err.message , "thisss");
+    console.log(err.message);
+  }
   }
 
 
 
-  }
+
   
 
 

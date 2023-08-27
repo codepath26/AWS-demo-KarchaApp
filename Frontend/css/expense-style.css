@@ -23,3 +23,8 @@ body {
   display: flex;
   justify-content: center;
 }
+.premiumUser{
+  background-color: rgb(13, 67, 21);
+  color: white;
+  display:none;
+}
