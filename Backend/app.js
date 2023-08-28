@@ -1,15 +1,26 @@
 const express = require('express')
+const userRoutes = require('./routes/expense')
+const sequelize = require('./utils/database');
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const loginRoutes = require('./routes/login');
-const sequelize = require('./utils/database');
 const User = require('./models/user');
+const ForgotPassword = require('./models/forgotpass');
+const ForgotPasswordRoutes = require('./routes/changePass');
+const Order = require('./models/order');
+const Expense = require('./models/appo-Details');
 const app = express()
-
-
+app.use(bodyParser.json());   
+const port = 9000 
 app.use(cors());
-const port = 3000
-app.use(bodyParser.json());
-sequelize.sync({force : false});
+app.use(userRoutes);
 app.use(loginRoutes);
+app.use('/password', ForgotPasswordRoutes);
+User.hasMany(Expense)
+Expense.belongsTo(User , { onDelete: 'CASCADE'})
+User.hasMany(Order)
+Order.belongsTo(User , { onDelete: 'CASCADE'});
+User.hasMany(ForgotPassword);
+ForgotPassword.belongsTo(User ,{ onDelete: 'CASCADE'});
+sequelize.sync();
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

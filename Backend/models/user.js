@@ -10,11 +10,18 @@ const User = sequelize.define('user',{
   email : {
     type : DataTypes.STRING,
     allowNull : false,
+    unique : true,
+    validate : {
+      isEmail : true,
+    },
   },
   password : {
-    type :  DataTypes.STRING ,
+    type :  DataTypes.TEXT ,
     allowNull : false,
   },
+  ispremiumuser : DataTypes.BOOLEAN ,
+  totalExpenses : DataTypes.INTEGER ,
+  
 })
 
 
