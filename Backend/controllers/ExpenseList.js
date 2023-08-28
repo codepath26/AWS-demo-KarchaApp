@@ -23,6 +23,7 @@ exports.getDetails = async (req, res, next) => {
 exports.postDetail = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
+<<<<<<< HEAD
     const id = req.user.userId
     const user = await User.findByPk(id);
     const { amount, description, category } = req.body;
@@ -31,6 +32,17 @@ exports.postDetail = async (req, res, next) => {
     
      let total = user.totalExpenses + parseInt(amount);
      console.log(`this is the total wnated to add ==>${total}`);
+=======
+  
+
+
+    const id = req.user.userId
+    const user = await User.findByPk(id);
+    const { amount, description, category } = req.body;
+  
+     let total = user.totalExpenses + parseInt(amount);
+     console.log(total);
+>>>>>>> 02969df3ac8ead5d2a4f8e72228272266c8683e6
      await  user.update({totalExpenses : total },{
         transaction : t
       });
@@ -39,7 +51,11 @@ exports.postDetail = async (req, res, next) => {
       amount: amount,
       description: description,
       category: category,
+<<<<<<< HEAD
       userId: user.id,
+=======
+      userId: useer.id,
+>>>>>>> 02969df3ac8ead5d2a4f8e72228272266c8683e6
     },{ transaction: t });
     await t.commit();
     res.status(201).json(newUser); // Assuming you want to send the created user back
@@ -75,7 +91,10 @@ exports.deletDetail = async (req, res, next) => {
 };
 exports.updateDetail = async (req, res, next) => {
   try {
+<<<<<<< HEAD
  
+=======
+>>>>>>> 02969df3ac8ead5d2a4f8e72228272266c8683e6
   const listtId = req.params.id;
   let expense = await Expenses.updateByPk(listtId);
   const id = expense.userId;
@@ -90,9 +109,20 @@ exports.updateDetail = async (req, res, next) => {
 };
 
 exports.getDetailsbyId = async (req, res) => {
+<<<<<<< HEAD
   try {
     let getId = req.params.id;
     let expense = await Expenses.findOne({ where: { id: getId } });
+=======
+  let getId = req.params.id;
+  try {
+    let expense = await Expenses.findOne({ where: { id: getId } });
+    const id = expense.userId;
+  const user = User.findByPk(id);
+  const expenseAmount = parseInt(expense.amount)
+  let total = user.totalExpenses - expenseAmount ;
+  user.update({totalExpenses : total})
+>>>>>>> 02969df3ac8ead5d2a4f8e72228272266c8683e6
     res.status(200).json(expense);
   } catch (err) {
     res.status(500).json({ err: "Error getting data" });

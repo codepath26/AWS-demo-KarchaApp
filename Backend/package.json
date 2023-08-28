@@ -13,7 +13,10 @@
     "nodemon": "^3.0.1"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@sendgrid/mail": "^7.7.0",
+=======
+>>>>>>> 02969df3ac8ead5d2a4f8e72228272266c8683e6
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
@@ -28,7 +31,11 @@
     "passport-local": "^1.0.0",
     "razorpay": "^2.9.2",
     "sequelize": "^6.32.1",
+<<<<<<< HEAD
     "sib-api-v3-sdk": "^8.5.0",
     "uuid": "^9.0.0"
+=======
+    "sib-api-v3-sdk": "^8.5.0"
+>>>>>>> 02969df3ac8ead5d2a4f8e72228272266c8683e6
   }
 }
